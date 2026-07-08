@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +15,20 @@ import com.projectphoenix.dto.response.ProjectResponse;
 import com.projectphoenix.entity.Project;
 import com.projectphoenix.exception.ProjectNotFoundException;
 import com.projectphoenix.repository.ProjectRepository;
+
 @Service
 public class ProjectServiceImpl implements ProjectService {
+
+	private static final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
 	@Autowired
 	private ProjectRepository projectRepository;
 
 	@Override
 	public ProjectResponse createProject(CreateProjectRequest request) {
+
+		logger.info("Creating Project with name: { }", request.getName());
+
 		Project project = new Project();
 		project.setName(request.getName());
 		project.setDescription(request.getDescription());
@@ -42,6 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<ProjectResponse> getAllProjects() {
+
 		List<Project> projectList = projectRepository.findAll();
 		List<ProjectResponse> responseList = new ArrayList<ProjectResponse>();
 		for (Project project : projectList) {
@@ -60,7 +69,10 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public ProjectResponse getProjectById(Long id) {
-		Project project = (Project)projectRepository.findById(id).orElseThrow(()->new ProjectNotFoundException(id));
+
+		logger.info("Getting Project by using ID " + id);
+
+		Project project = projectRepository.findById(id).orElseThrow(() -> new ProjectNotFoundException(id));
 		ProjectResponse projectResponse = new ProjectResponse();
 		projectResponse.setId(project.getId());
 		projectResponse.setName(project.getName());
@@ -69,12 +81,16 @@ public class ProjectServiceImpl implements ProjectService {
 		projectResponse.setApplicationType(project.getApplicationType());
 		projectResponse.setCreatedAt(project.getCreatedAt());
 		projectResponse.setUpdatedAt(project.getUpdatedAt());
+		
 		return projectResponse;
 	}
 
 	@Override
 	public ProjectResponse updateProject(Long id, UpdateProjectRequest request) {
-		Project project = (Project)projectRepository.findById(id).orElseThrow(()-> new ProjectNotFoundException(id));
+
+		logger.info("Updating Project with ID {}", id);
+
+		Project project = (Project) projectRepository.findById(id).orElseThrow(() -> new ProjectNotFoundException(id));
 		project.setName(request.getName());
 		project.setDescription(request.getDescription());
 		project.setEnvironment(request.getEnvironment());
@@ -90,11 +106,14 @@ public class ProjectServiceImpl implements ProjectService {
 		projectResponse.setCreatedAt(response.getCreatedAt());
 		projectResponse.setUpdatedAt(response.getUpdatedAt());
 		return projectResponse;
-	
+
 	}
 
 	@Override
 	public void deleteProject(Long id) {
+
+		logger.info("Deleting Project with ID {}", id);
+
 		projectRepository.deleteById(id);
 	}
 
